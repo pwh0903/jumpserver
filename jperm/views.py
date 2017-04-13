@@ -259,7 +259,7 @@ def perm_role_list(request):
     # TODO: 搜索和分页
     keyword = request.GET.get('search', '')
     if keyword:
-        roles_list = roles_list.filter(Q(name=keyword))
+        roles_list = roles_list.filter(Q(name=keyword) | Q(name__icontains=keyword))
 
     if role_id:
         roles_list = roles_list.filter(id=role_id)
@@ -287,13 +287,17 @@ def perm_role_add(request):
         sudo_ids = request.POST.getlist('sudo_name')
 
         try:
-            if get_object(PermRole, name=name):
-                raise ServerError(u'已经存在该用户 %s' % name)
             if name == "root":
                 raise ServerError(u'禁止使用root用户作为系统用户，这样非常危险！')
-            default = get_object(Setting, name='default')
             if len(password) > 64:
                 raise ServerError(u'密码长度不能超过64位!')
+            if get_object(PermRole, name=name):
+                raise ServerError(u'已经存在该用户 %s' % name)
+            # if name == "root":
+            #     raise ServerError(u'禁止使用root用户作为系统用户，这样非常危险！')
+            default = get_object(Setting, name='default')
+            # if len(password) > 64:
+            #     raise ServerError(u'密码长度不能超过64位!')
 
             if password:
                 encrypt_pass = CRYPTOR.encrypt(password)
@@ -301,13 +305,14 @@ def perm_role_add(request):
                 encrypt_pass = CRYPTOR.encrypt(CRYPTOR.gen_rand_pass(20))
             # 生成随机密码，生成秘钥对
             sudos_obj = [get_object(PermSudo, id=sudo_id) for sudo_id in sudo_ids]
-            if key_content:
-                try:
-                    key_path = gen_keys(key=key_content)
-                except SSHException, e:
-                    raise ServerError(e)
-            else:
-                key_path = gen_keys()
+            # if key_content:
+            # try:
+            key_path = gen_keys(key=key_content)
+            # except SSHException, e:
+            #     raise ServerError(e)
+            # else:
+            #     key_path = gen_keys()
+
             logger.debug('generate role key: %s' % key_path)
             role = PermRole(name=name, comment=comment, password=encrypt_pass, key_path=key_path)
             role.save()
@@ -435,11 +440,12 @@ def perm_role_edit(request):
     # 渲染数据
     role_id = request.GET.get("id")
     role = PermRole.objects.get(id=role_id)
-    role_pass = CRYPTOR.decrypt(role.password)
-    sudo_all = PermSudo.objects.all()
-    role_sudos = role.sudo.all()
-    sudo_all = PermSudo.objects.all()
+    ori_name = role.name
     if request.method == "GET":
+        # role_pass = CRYPTOR.decrypt(role.password)
+        sudo_all = PermSudo.objects.all()
+        role_sudos = role.sudo.all()
+        sudo_all = PermSudo.objects.all()
         return my_render('jperm/perm_role_edit.html', locals(), request)
 
     if request.method == "POST":
@@ -454,12 +460,12 @@ def perm_role_edit(request):
             raise ServerError(u'密码长度不能超过64位!')
 
         try:
-            if not role:
-                raise ServerError('该系统用户不能存在')
-
+            # if not role:
+            #     raise ServerError('该系统用户不能存在')
             if role_name == "root":
                 raise ServerError(u'禁止使用root用户作为系统用户，这样非常危险！')
-
+            if PermRole.objects.get(name=role_name) and (role_name != ori_name):
+                raise ServerError(u'role %s is already exists.' % role_name)
             if role_password:
                 encrypt_pass = CRYPTOR.encrypt(role_password)
                 role.password = encrypt_pass
@@ -601,7 +607,7 @@ def perm_sudo_list(request):
     # TODO: 搜索和分页
     keyword = request.GET.get('search', '')
     if keyword:
-        sudos_list = sudos_list.filter(Q(name=keyword))
+        sudos_list = sudos_list.filter(Q(name=keyword) | Q(name__icontains=keyword))
 
     sudos_list, p, sudos, page_range, current_page, show_first, show_end = pages(sudos_list, request)
 

@@ -241,7 +241,7 @@ def setting(request):
 
                     if private_key:
                         with open(private_key_path, 'w') as f:
-                                f.write(private_key)
+                            f.write(private_key)
                         os.chmod(private_key_path, 0600)
 
                     if setting_default:

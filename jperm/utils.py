@@ -47,11 +47,11 @@ def gen_keys(key="", key_path_dir=""):
         key = RSAKey.generate(2048)
         key.write_private_key_file(private_key)
     else:
-        key_file = os.path.join(key_path_dir, 'id_rsa')
-        with open(key_file, 'w') as f:
+        # key_file = os.path.join(key_path_dir, 'id_rsa')
+        with open(private_key, 'w') as f:
             f.write(key)
-            f.close()
-        with open(key_file) as f:
+
+        with open(private_key) as f:
             try:
                 key = RSAKey.from_private_key(f)
             except SSHException, e:
@@ -59,12 +59,12 @@ def gen_keys(key="", key_path_dir=""):
                 raise SSHException(e)
     os.chmod(private_key, 0644)
 
-    with open(public_key, 'w') as content_file:
+    with open(public_key, 'w') as f:
         for data in [key.get_name(),
                      " ",
                      key.get_base64(),
                      " %s@%s" % ("jumpserver", os.uname()[1])]:
-            content_file.write(data)
+            f.write(data)
     return key_path_dir
 
 
