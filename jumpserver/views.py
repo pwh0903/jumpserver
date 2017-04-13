@@ -154,15 +154,15 @@ def skin_config(request):
     return render_to_response('skin_config.html')
 
 
-def is_latest():
-    node = uuid.getnode()
-    jsn = uuid.UUID(int=node).hex[-12:]
-    with open(os.path.join(BASE_DIR, 'version')) as f:
-        current_version = f.read()
-    lastest_version = urllib.urlopen('http://www.jumpserver.org/lastest_version.html?jsn=%s' % jsn).read().strip()
+# def is_latest():
+#     node = uuid.getnode()
+#     jsn = uuid.UUID(int=node).hex[-12:]
+#     with open(os.path.join(BASE_DIR, 'version')) as f:
+#         current_version = f.read()
+#     lastest_version = urllib.urlopen('http://www.jumpserver.org/lastest_version.html?jsn=%s' % jsn).read().strip()
 
-    if current_version != lastest_version:
-        pass
+#     if current_version != lastest_version:
+#         pass
 
 
 @defend_attack

@@ -376,7 +376,7 @@ def asset_ansible_update(obj_list, name=''):
         else:
             try:
                 asset_info = get_ansible_asset_info(asset.ip, setup_info)
-                print asset_info
+                # print asset_info
                 other_ip, mac, cpu, memory, disk, sn, system_type, system_version, brand, system_arch = asset_info
                 asset_dic = {"other_ip": other_ip,
                              "mac": mac,
