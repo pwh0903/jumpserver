@@ -162,8 +162,8 @@ class PreSetup(object):
             self.check_bash_return(ret_code, "安装mysql失败, 请检查安装源是否更新或手动安装！")
 
             bash('service mysql start')
-            bash('mysql -e "create database %s default charset=utf8"' % self.db)
-            bash('mysql -e "grant all on %s.* to \'%s\'@\'%s\' identified by \'%s\'"' % (self.db,
+            bash('mysql -uroot -proot -e "create database %s default charset=utf8"' % self.db)
+            bash('mysql -uroot -proot -e "grant all on %s.* to \'%s\'@\'%s\' identified by \'%s\'"' % (self.db,
                                                                                          self.db_user,
                                                                                          self.db_host,
                                                                                          self.db_pass))
